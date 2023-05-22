@@ -1,23 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import WeatherInfo from './WeatherInfo';
+
+interface HourlyWeatherData {
+  temperature_2m: number[];
+  time: string[];
+}
+
+interface WeatherDataResponse {
+  hourly: HourlyWeatherData;
+}
 
 function App() {
+  const [data, setData] = useState<WeatherDataResponse>();
+  useEffect(() => {
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=54.33&longitude=48.39&hourly=temperature_2m")
+      .then(d => d.json())
+      .then(d => setData(d));
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {data && data.hourly.time.map((currentTime, index) => {
+          return <WeatherInfo key={index} date={currentTime} temp={data.hourly.temperature_2m[index]} />
+        })}
       </header>
     </div>
   );
